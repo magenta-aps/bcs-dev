@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
     sudo yum update -y
     sudo yum install mysql-server -y
     sudo systemctl start mysqld
-    sudo mysql -u root --execute="create database bcs; grant all on bcs.* to 'bcs' identified by 'bcs';"
+    sudo mysql -u root --execute="create database bcs; grant all on bcs.* to 'bcs'@'localhost' identified by 'bcs';"
 
     sudo yum install php56w php56w-mysql php56w-pdo php56w-pecl-redis php56w-mbstring php56w-libxml php56w-ldap php56w-opcache php56w-pear php56-pecl-imagick php56w-mcrypt php56w-common -y
 
@@ -40,6 +40,43 @@ Vagrant.configure("2") do |config|
     curl -sS https://getcomposer.org/installer | php
     sudo mv composer.phar /usr/local/bin/composer
 
-    
+    sudo mv ~/httpd.conf /etc/httpd/conf/httpd.conf
+
+    sudo yum install supervisor -y
+    sudo mv ~/supervisord.conf /etc/supervisord.conf
+    sudo mv ~/supervisord/* /etc/supervisord/
+    #sudo chown?
+
+    sudo service supervisord start
+
+    sudo setsebool httpd_can_sendmail 1
+    sudo setsebool httpd_can_network_connect 1
+
+    sudo mv ~/logrotate_httpd /etc/logrotate.d/httpd
+
+    cd /var/www/
+    sudo git clone https://github.com/magenta-aps/VoKS-shelter.git /var/www/html/application
+
+    sudo mkdir -p /var/www/html/application/public/uploads/maps
+    sudo chmod -R 0755 /var/www/html/application/public/uploads/
+
+    sudo mv ~/.env /var/www/html/application/
+
+    sudo chmod -R 777 /var/www/html/application/
+    cd /var/www/html/application/
+    composer install
+    php artisan migrate
+
+    sudo npm install bower -g
+    bower install --allow-root
+
+    sudo npm install gulp -g
+    ####sudo npm install -g ????
+
+    sudo chown -R apache.apache /var/www/html/
+    sudo chmod -R 0540 /var/www/html/
+    sudo chmod -R 0755 /var/www/html/application/storage/
+
+
   SHELL
 end
