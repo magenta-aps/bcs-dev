@@ -1,7 +1,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
-  config.vm.network "public_network"
-
+#  config.vm.network "public_network"
+  config.vm.network "private_network", type: "dhcp"
   config.vm.provider "virtualbox" do |vb|   
     vb.memory = "2048"
     vb.cpus = 2
@@ -87,7 +87,7 @@ Vagrant.configure("2") do |config|
     sudo chown -R apache.apache /var/www/html/
     sudo chmod -R 0554 /var/www/html/
     sudo chmod +x -R /var/www/html/
-    sudo chmod -R 0755 /var/www/html/application/storage/
+    sudo chmod -R 0775 /var/www/html/application/storage/
 
     sudo mkdir /var/www/html/application/storage/framework/views
     sudo chown -R apache.apache /var/www/html/application/storage/framework/views
@@ -95,5 +95,30 @@ Vagrant.configure("2") do |config|
 
     sudo service httpd start
 
+    sudo git clone https://github.com/magenta-aps/VoKS-server.git /var/www/html/server
+    sudo chown -R apache.apache /var/www/html/server/
+
+    sudo mv ~/server/* /var/www/html/server/configs/
+
+    sudo yum install gcc -y
+    sudo yum install gcc-c++ -y
+
+    cd /var/www/html/server/
+    sudo npm install --unsafe-perm
+
+
+    sudo systemctl enable mysqld
+    sudo systemctl enable httpd
+    sudo systemctl enable supervisord
+
+    sudo service supervisord stop
+    sudo service httpd stop
+    sudo service mysqld stop
+
+    sudo service mysqld start
+    sudo service httpd start
+    sudo service supervisord start
+
+    sudo usermod -a -G apache vagrant
   SHELL
 end
