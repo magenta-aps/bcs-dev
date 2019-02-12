@@ -71,12 +71,29 @@ Vagrant.configure("2") do |config|
     bower install --allow-root
 
     sudo npm install gulp -g
-    ####sudo npm install -g ????
+
+    npm install
+    npm rebuild node-sass
+
+    gulp --production
+    php artisan key:generate
+
+    cd /var/www/html/application/
+    sudo chcon -R -t httpd_sys_rw_content_t storage/
+    sudo chcon -R -t httpd_sys_rw_content_t public/
+    sudo chcon -R -t httpd_sys_rw_content_t vendor/
+    sudo chcon -R -t httpd_sys_rw_content_t /etc/httpd/
 
     sudo chown -R apache.apache /var/www/html/
-    sudo chmod -R 0540 /var/www/html/
+    sudo chmod -R 0554 /var/www/html/
+    sudo chmod +x -R /var/www/html/
     sudo chmod -R 0755 /var/www/html/application/storage/
 
+    sudo mkdir /var/www/html/application/storage/framework/views
+    sudo chown -R apache.apache /var/www/html/application/storage/framework/views
+    php artisan cache:clear
+
+    sudo service httpd start
 
   SHELL
 end
