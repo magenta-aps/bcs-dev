@@ -27,10 +27,10 @@ Vagrant.configure("2") do |config|
 
     echo "Updating repos"
 
+    sudo yum history new
     sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 
-    sudo yum history sync
     sudo yum update -y
 
 #    sudo firewall-cmd --permanent --add-port=9000/tcp
@@ -91,18 +91,18 @@ Vagrant.configure("2") do |config|
     cd /var/www/html/application/
 
     echo "composer install"
-    composer install
+    composer install --no-ansi &>composer.log
     echo "artisan migrate"
     php artisan migrate
 
     echo "bower install"
     sudo npm install bower -g
-    bower install --allow-root
+    bower install --allow-root --loglevel error
 
     sudo npm install gulp -g
 
     echo "npm install"
-    npm install
+    npm install --loglevel error
     npm rebuild node-sass
 
     echo "gulp --production"
