@@ -36,9 +36,10 @@ Vagrant.configure("2") do |config|
 #    sudo firewall-cmd --permanent --add-port=9000/tcp
 #    sudo firewall-cmd --permanent --add-port=9001/tcp
 
-    echo "Installing packages"
-    sudo yum install mc nmap htop -y
+    echo "Installing dev packages"
+    sudo yum install mc nmap htop vim nano -y
 
+    echo "Installing mysql"
     sudo yum install wget -y
     sudo wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
     sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
@@ -97,12 +98,12 @@ Vagrant.configure("2") do |config|
 
     echo "bower install"
     sudo npm install bower -g
-    bower install --allow-root --loglevel error
+    bower install --allow-root
 
     sudo npm install gulp -g
 
     echo "npm install"
-    npm install --loglevel error
+    npm install
     npm rebuild node-sass
 
     echo "gulp --production"
