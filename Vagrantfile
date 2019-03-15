@@ -1,7 +1,9 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 #  config.vm.network "public_network"
-  config.vm.network "private_network", type: "dhcp"
+#  config.vm.network "private_network", type: "dhcp"
+  config.vm.network :forwarded_port, guest: 80, host: 80
+  config.vm.network :forwarded_port, guest: 443, host: 443
   config.vm.provider "virtualbox" do |vb|   
     vb.memory = "2048"
     vb.cpus = 2
@@ -52,7 +54,7 @@ Vagrant.configure("2") do |config|
 
 
     echo "Installing PHP"
-    sudo yum install php56w php56w-mysql php56w-pdo php56w-pecl-redis php56w-mbstring php56w-libxml php56w-ldap php56w-opcache php56w-pear php56-pecl-imagick php56w-mcrypt php56w-common -y
+    sudo yum install php56w php56w-mysql php56w-pdo php56w-pecl-redis php56w-mbstring php56w-libxml php56w-ldap php56w-opcache php56w-pear php56-pecl-imagick php56w-mcrypt php56w-common mod_ssl -y
 
     echo "Installing Node.js"
     curl -sL https://rpm.nodesource.com/setup_6.x | sudo bash -
@@ -64,6 +66,9 @@ Vagrant.configure("2") do |config|
     sudo mv composer.phar /usr/local/bin/composer
 
     sudo mv ~/httpd.conf /etc/httpd/conf/httpd.conf
+    sudo mv ~/ssl.conf /etc/httpd/conf.d/ssl.conf
+    sudo mv ~/certificates/bcomesafe.key /etc/pki/tls/private/
+    sudo mv ~/certificates/bcomesafe.crt /etc/pki/tls/certs/
 
     sudo yum install supervisor -y
     sudo mv ~/supervisord.conf /etc/supervisord.conf
@@ -149,6 +154,7 @@ Vagrant.configure("2") do |config|
     sudo yum install gcc-c++ -y
 
     cd /var/www/html/server/
+    sudo chmod g+w .
     echo "npm install"
     sudo npm install --unsafe-perm
 
