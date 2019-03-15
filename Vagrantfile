@@ -67,8 +67,15 @@ Vagrant.configure("2") do |config|
 
     sudo mv ~/httpd.conf /etc/httpd/conf/httpd.conf
     sudo mv ~/ssl.conf /etc/httpd/conf.d/ssl.conf
+
+    sudo setenforce 0
+    sudo chown root.apache ~/certificates/*
+    sudo chmod g+r ~/certificates/*
+
     sudo mv ~/certificates/bcomesafe.key /etc/pki/tls/private/
     sudo mv ~/certificates/bcomesafe.crt /etc/pki/tls/certs/
+    sudo mv ~/certificates/IntermediateCA.crt /etc/pki/tls/private/IntermediateCA.crt
+
 
     sudo yum install supervisor -y
     sudo mv ~/supervisord.conf /etc/supervisord.conf
