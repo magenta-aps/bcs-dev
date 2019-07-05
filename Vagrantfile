@@ -2,8 +2,10 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 #  config.vm.network "public_network"
 #  config.vm.network "private_network", type: "dhcp"
-  config.vm.network :forwarded_port, guest: 80, host: 80
-  config.vm.network :forwarded_port, guest: 443, host: 443
+  config.vm.network :forwarded_port, guest: 80, host: 8080
+  config.vm.network :forwarded_port, guest: 443, host: 10443
+  config.vm.network :forwarded_port, guest: 9000, host: 9000
+  config.vm.network :forwarded_port, guest: 9001, host: 9001
   config.vm.provider "virtualbox" do |vb|   
     vb.memory = "2048"
     vb.cpus = 2
