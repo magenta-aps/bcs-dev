@@ -32,14 +32,19 @@ Vagrant.configure("2") do |config|
     echo "Updating repos"
 
     sudo yum history new
-    sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    sudo yum install epel-release -y
+    sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
     sudo rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 
     sudo yum update -y
+    sudo yum install -y yum-utils
+    sudo yum-config-manager --disable remi-php54
+    sudo yum-config-manager --enable remi-php73
 
-#    sudo firewall-cmd --permanent --add-port=9000/tcp
-#    sudo firewall-cmd --permanent --add-port=9001/tcp
+    sudo yum update -y
 
+    sudo yum install php -y
+    sudo yum groupinstall 'Development Tools' -y
     echo "Installing dev packages"
     sudo yum install mc nmap htop vim nano -y
 
@@ -54,9 +59,8 @@ Vagrant.configure("2") do |config|
     sudo systemctl start mysqld
     sudo mysql -u root --execute="create database bcs; grant all on bcs.* to 'bcs'@'localhost' identified by 'bcs';"
 
-
-    echo "Installing PHP"
-    sudo yum install php56w php56w-mysql php56w-pdo php56w-pecl-redis php56w-mbstring php56w-libxml php56w-ldap php56w-opcache php56w-pear php56-pecl-imagick php56w-mcrypt php56w-common mod_ssl -y
+    echo "Installing php packages"
+    sudo yum install php-mysql php-pdo php-pecl-redis php-mbstring php-ldap php-opcache php-pear php-pecl-imagick php-pecl-mcrypt mod_ssl -y
 
     echo "Installing Node.js"
     curl -sL https://rpm.nodesource.com/setup_6.x | sudo bash -
@@ -95,24 +99,26 @@ Vagrant.configure("2") do |config|
 
     echo "Cloning shelter"
     cd /var/www/
-    sudo git clone https://github.com/magenta-aps/VoKS-shelter.git /var/www/html/application
+    sudo chown -R vagrant.apache /var/www/html/
+    git clone --branch php7_compat https://github.com/magenta-aps/VoKS-shelter.git /var/www/html/application
 
-    sudo mkdir -p /var/www/html/application/public/uploads/maps
-    sudo chmod -R 0755 /var/www/html/application/public/uploads/
+    mkdir -p /var/www/html/application/public/uploads/maps
+    chmod -R 0755 /var/www/html/application/public/uploads/
 
-    sudo mv ~/.env /var/www/html/application/
+    mv ~/.env /var/www/html/application/
 
-    sudo chmod -R 777 /var/www/html/application/
+    chmod -R 777 /var/www/html/application/
     cd /var/www/html/application/
 
     echo "composer install"
     composer install --no-ansi &>composer.log
+    mkdir bootstrap/cache
     echo "artisan migrate"
     php artisan migrate
 
     echo "bower install"
     sudo npm install bower -g
-    bower install --allow-root
+    bower install
 
     sudo npm install gulp -g
 
@@ -120,8 +126,8 @@ Vagrant.configure("2") do |config|
     npm install
     npm rebuild node-sass
 
-    echo "gulp --production"
-    gulp --production
+    echo "gulp"
+    gulp
 
     echo "artisan key:generate"
     php artisan key:generate
@@ -132,13 +138,13 @@ Vagrant.configure("2") do |config|
     sudo chcon -R -t httpd_sys_rw_content_t vendor/
     sudo chcon -R -t httpd_sys_rw_content_t /etc/httpd/
 
-    sudo chown -R apache.apache /var/www/html/
-    sudo chmod -R 0554 /var/www/html/
-    sudo chmod +x -R /var/www/html/
+    sudo chown -R vagrant.apache /var/www/html/
+#    sudo chmod -R 0554 /var/www/html/
+#    sudo chmod +x -R /var/www/html/
     sudo chmod -R 0775 /var/www/html/application/storage/
 
     sudo mkdir /var/www/html/application/storage/framework/views
-    sudo chown -R apache.apache /var/www/html/application/storage/framework/views
+    sudo chown -R apache.apache /var/www/html/application/storage/
 
     echo "Changing apache shell to /bin/bash"
     sudo chsh -s /bin/bash apache
@@ -154,13 +160,9 @@ Vagrant.configure("2") do |config|
     sudo service httpd start
 
     echo "Cloning server"
-    sudo git clone https://github.com/magenta-aps/VoKS-server.git /var/www/html/server
-    sudo chown -R apache.apache /var/www/html/server/
+    git clone https://github.com/magenta-aps/VoKS-server.git /var/www/html/server
 
-    sudo mv ~/server/* /var/www/html/server/configs/
-
-    sudo yum install gcc -y
-    sudo yum install gcc-c++ -y
+    mv ~/server/* /var/www/html/server/configs/
 
     cd /var/www/html/server/
     sudo chmod g+w .
